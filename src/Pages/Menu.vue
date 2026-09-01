@@ -224,22 +224,22 @@
   </div>
 </template>
 
- <script setup>
+<script setup>
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter, useRoute } from 'vue-router'
 import ScanModal from './ScanModal.vue'
 
 const router = useRouter()
-const route = useRoute() // FIX: Panggil useRoute()
+const route = useRoute()
 
-// CONFIG & API
- const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
+// CONFIG & API (Gunakan Environment Variable agar siap deploy ke Vercel/Railway)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
 const API_URL = `${API_BASE_URL}/products`
 
-// Helper mengambil Secret Key dari URL query (?admin=...) atau localStorage
+// 1. PERBAIKAN: Ambil key MURNI dari URL query atau LocalStorage saja (TANPA DEFAULT FALLBACK)
 const getAdminKey = () => {
-  return route.query.admin || localStorage.getItem('admin_secret') || 'admin123'
+  return route.query.admin || localStorage.getItem('admin_secret') || ''
 }
 
 // STATE UNTUK SCANNER & MODAL
@@ -297,7 +297,7 @@ const processOrder = async (tableNumber) => {
   }
 
   try {
-    const res = await axios.post('http://127.0.0.1:8000/api/orders', payload)
+    const res = await axios.post(`${API_BASE_URL}/orders`, payload)
     const orderData = res.data.data || res.data.order || res.data
     const orderId = orderData.id || res.data.order_id
 
@@ -384,13 +384,26 @@ const totalItemsCount = computed(() => {
   return cart.value.reduce((sum, item) => sum + item.qty, 0)
 })
 
-// LIFECYCLE & HANDLERS
+// 2. PERBAIKAN: PROTEKSI KETAT LIFECYCLE HOOK
 onMounted(() => {
-  const adminKey = getAdminKey()
-  if (adminKey === 'admin123') {
+  const urlAdminKey = route.query.admin
+  const savedKey = localStorage.getItem('admin_secret')
+
+  // Cek apakah key valid dari URL (?admin=MAKBOS2026 atau ?admin=admin123)
+  if (urlAdminKey === 'MAKBOS2026' || urlAdminKey === 'admin123') {
     isAdmin.value = true
-    localStorage.setItem('admin_secret', adminKey)
+    localStorage.setItem('admin_secret', urlAdminKey)
+  } 
+  // Cek apakah user memiliki key valid yang pernah tersimpan di LocalStorage
+  else if (savedKey === 'MAKBOS2026' || savedKey === 'admin123') {
+    isAdmin.value = true
+  } 
+  // Jika tidak ada key valid, pastikan status admin MATI
+  else {
+    isAdmin.value = false
+    localStorage.removeItem('admin_secret')
   }
+
   fetchProducts()
 })
 
@@ -429,7 +442,6 @@ const fetchProducts = async () => {
   }
 }
 
-// FIX: Tambah Produk menggunakan header 'x-admin-secret'
 const createProduct = async () => {
   const formData = new FormData()
   formData.append('name', form.value.name)
@@ -457,7 +469,6 @@ const createProduct = async () => {
   }
 }
 
-// FIX: Update Produk menggunakan header 'x-admin-secret'
 const updateProduct = async () => {
   const formData = new FormData()
   formData.append('_method', 'PUT')
@@ -499,7 +510,6 @@ const openEditModal = (product) => {
 
 const closeEditModal = () => { isEditing.value = false }
 
-// FIX: Delete Produk menggunakan header 'x-admin-secret'
 const deleteProduct = async (id) => {
   if (!confirm('Yakin ingin menghapus menu ini?')) return
   try {
@@ -513,17 +523,17 @@ const deleteProduct = async (id) => {
   }
 }
 
+// 3. PERBAIKAN: Bersihkan URL query saat keluar mode admin
 const exitAdmin = () => {
   isAdmin.value = false
   localStorage.removeItem('admin_secret')
-  router.push('/menu')
+  router.replace({ path: route.path, query: {} })
 }
 
 const formatRupiah = (number) => {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number)
 }
 </script>
-
 <style scoped>
 .menu-page {
   min-height: 100vh;
