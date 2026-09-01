@@ -218,11 +218,7 @@ const stopPolling = () => {
 
 onMounted(() => {
   fetchOrderStatus()
-
-  // Polling tiap 3 detik
-  pollingTimer = setInterval(() => {
-    fetchOrderStatus()
-  }, 3000)
+  pollingTimer = setInterval(fetchOrderStatus, 3000) // Ambil data tiap 3 detik
 })
 
 onUnmounted(() => {
