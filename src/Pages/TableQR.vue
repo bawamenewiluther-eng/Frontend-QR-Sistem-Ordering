@@ -38,11 +38,11 @@ let intervalId = null
 
 const generateDynamicToken = () => {
   const secret = tableSecrets[tableNumber] || 'SECRET_DEFAULT'
-  // Pembulatan timestamp per 60 detik (1 menit)
+  // Gunakan Math.floor timestamp per 60 detik
   const currentMinuteTimestamp = Math.floor(Date.now() / 60000) * 60
   
-  // Format Payload QR: MEJA-02|SECRET_MEJA_2|TIMESTAMP
-  qrToken.value = `MEJA-${tableNumber}|${secret}|${currentMinuteTimestamp}`
+  // PERBAIKAN: Gunakan tableNumber langsung (e.g., "1|SECRET_MEJA_1|1700000000")
+  qrToken.value = `${tableNumber}|${secret}|${currentMinuteTimestamp}`
 }
 
 onMounted(() => {
