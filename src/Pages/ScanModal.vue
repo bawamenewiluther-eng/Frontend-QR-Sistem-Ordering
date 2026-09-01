@@ -23,6 +23,9 @@ import axios from 'axios'
 const emit = defineEmits(['qrValidated', 'close'])
 const router = useRouter()
 
+// Dynamic API Base URL
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
+
 const errorMessage = ref('')
 let scanner = null
 
@@ -31,6 +34,11 @@ onMounted(() => {
 })
 
 const initScanner = () => {
+  // Membersihkan scanner lama jika ada
+  if (scanner) {
+    clearScannerSilently()
+  }
+
   scanner = new Html5QrcodeScanner("reader", {
     fps: 10,
     qrbox: { width: 220, height: 220 }
@@ -39,23 +47,30 @@ const initScanner = () => {
   scanner.render(onScanSuccess, onScanFailure)
 }
 
-const onScanSuccess = async (decodedText) => {
-  try {
-    // 1. Hentikan scanner sementara agar tidak membaca berulang
-    if (scanner) {
+const clearScannerSilently = async () => {
+  if (scanner) {
+    try {
       await scanner.clear()
+    } catch (e) {
+      console.warn('Gagal membersihkan scanner secara normal:', e)
+    } finally {
       scanner = null
     }
+  }
+}
 
-    // 2. Request ke backend (menggunakan relative path /api)
-    const res = await axios.post('/api/validate-qr', { qr_token: decodedText })
+const onScanSuccess = async (decodedText) => {
+  // Stop scanner sementara
+  await clearScannerSilently()
+
+  try {
+    // Gunakan URL Backend Railway
+    const res = await axios.post(`${API_BASE_URL}/validate-qr`, { qr_token: decodedText })
 
     if (res.data.success) {
-      // Ambil order_id & table_number dari response API
       const orderId = res.data.order_id || res.data.order?.id || res.data.id
       const tableNumber = res.data.table_number || res.data.order?.table_number
 
-      // 3. Simpan ke localStorage agar diizinkan oleh checkOrderOwnership() di OrderStatus.vue
       if (orderId) {
         let myOrders = []
         try {
@@ -70,14 +85,10 @@ const onScanSuccess = async (decodedText) => {
           localStorage.setItem('my_orders', JSON.stringify(myOrders))
         }
 
-        // 4. Beritahu parent component
         emit('qrValidated', tableNumber)
         emit('close')
-
-        // 5. Navigasi otomatis ke halaman order status
         router.push(`/order-status/${orderId}`)
       } else {
-        // Jika scan QR hanya untuk set nomor meja (tanpa buat pesanan)
         emit('qrValidated', tableNumber)
         emit('close')
       }
@@ -88,42 +99,30 @@ const onScanSuccess = async (decodedText) => {
     if (err.response) {
       errorMessage.value = err.response.data?.message || 'Gagal memvalidasi QR Code!'
     } else if (err.request) {
-      errorMessage.value = 'Tidak dapat terhubung ke server! Periksa koneksi atau CORS.'
+      errorMessage.value = 'Tidak dapat terhubung ke server Backend!'
     } else {
       errorMessage.value = err.message || 'Terjadi kesalahan sistem.'
     }
     
-    // Inisialisasi ulang scanner setelah 2.5 detik jika gagal
+    // Inisialisasi ulang jika gagal
     setTimeout(() => {
       errorMessage.value = ''
-      if (!scanner) {
-        initScanner()
-      }
+      initScanner()
     }, 2500)
   }
-  console.log('Hasil Scan Mentah:', decodedText)
 }
 
 const onScanFailure = () => {
-  // Abaikan frame kamera yang belum menemukan QR
+  // Abaikan frame tanpa QR
 }
 
 const handleClose = async () => {
-  if (scanner) {
-    try {
-      await scanner.clear()
-    } catch (e) {
-      console.error(e)
-    }
-  }
+  await clearScannerSilently()
   emit('close')
 }
 
-
-onUnmounted(() => {
-  if (scanner) {
-    scanner.clear().catch(() => {})
-  }
+onUnmounted(async () => {
+  await clearScannerSilently()
 })
 </script>
 
