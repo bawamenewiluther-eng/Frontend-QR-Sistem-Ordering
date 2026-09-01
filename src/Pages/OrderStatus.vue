@@ -148,7 +148,9 @@ const checkOrderOwnership = () => {
   }
   return true
 }
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
+const API_URL = `${API_BASE_URL}/products`
+  
  const fetchOrderStatus = async () => {
   if (!checkOrderOwnership()) return
 
@@ -163,7 +165,7 @@ const checkOrderOwnership = () => {
 
   try {
     // 1. Tembak langsung ke port Laravel (8000) agar tidak 404 ke Vite (5173)
-    const res = await axios.get(`http://127.0.0.1:8000/api/orders/${orderId}/status`)
+    const res = await axios.get(`${API_BASE_URL}/orders/${orderId}/status`)
     
     const dataOrder = res.data?.order
     
@@ -195,7 +197,7 @@ const checkOrderOwnership = () => {
  const choosePayment = async (method) => {
   try {
     // Dipasang URL lengkap ke port 8000 Laravel
-    await axios.patch(`http://127.0.0.1:8000/api/orders/${route.params.id}/payment`, {
+    await axios.patch(`${API_BASE_URL}/orders/${route.params.id}/payment`,{
       payment_method: method
     })
     
