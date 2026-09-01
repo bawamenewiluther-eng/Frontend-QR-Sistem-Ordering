@@ -151,38 +151,37 @@ const checkOrderOwnership = () => {
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
 const API_URL = `${API_BASE_URL}/products`
   
- const fetchOrderStatus = async () => {
+ // Pastikan polling tetap berjalan selama status masih 'pending', 'processing', atau 'preparing'
+const fetchOrderStatus = async () => {
   if (!checkOrderOwnership()) return
 
-  // Pastikan mengambil ID yang valid (baik itu ref, route param, atau variabel biasa)
   const orderId = targetOrderId?.value || targetOrderId || route.params.id
 
   if (!orderId) {
-    console.warn('Order ID tidak ditemukan.')
     loading.value = false
     return
   }
 
   try {
-    // 1. Tembak langsung ke port Laravel (8000) agar tidak 404 ke Vite (5173)
     const res = await axios.get(`${API_BASE_URL}/orders/${orderId}/status`)
     
-    const dataOrder = res.data?.order
-    
-    if (dataOrder) {
-      // Pastikan total_price berupa angka (float/int)
+    if (res.data && res.data.success) {
+      const dataOrder = res.data.order
+      
+      // 1. Format ulang total_price
       dataOrder.total_price = Number(dataOrder.total_price || dataOrder.total || 0)
-      order.value = dataOrder
-      queuePosition.value = res.data.queue_position ?? 0
+      
+      // 2. TIMPA SELURUH OBJECT agar Reaktivitas Vue Bekerja 100%
+      order.value = { ...dataOrder }
+      
+      // 3. Update nilai antrian secara langsung
+      queuePosition.value = res.data.queue_position ?? 1
       ordersAhead.value = res.data.orders_ahead ?? 0
 
-      // 2. Gunakan optional chaining (?.) untuk mencegah crash jika status undefined
-      if (['completed', 'cancelled'].includes(order.value?.status)) {
+      // 4. HANYA hentikan polling JIKA pesanan benar-benar sudah SELESAI atau DIBATALKAN
+      if (['completed', 'cancelled'].includes(order.value.status)) {
         stopPolling()
       }
-    } else {
-      // Jika order data kosong dari response
-      stopPolling()
     }
   } catch (err) {
     console.error('Fetch Order Error:', err)
