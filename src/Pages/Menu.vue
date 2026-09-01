@@ -234,7 +234,8 @@ const router = useRouter()
 const route = useRoute() // FIX: Panggil useRoute()
 
 // CONFIG & API
-const API_URL = 'http://127.0.0.1:8000/api/products'
+ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
+const API_URL = `${API_BASE_URL}/products`
 
 // Helper mengambil Secret Key dari URL query (?admin=...) atau localStorage
 const getAdminKey = () => {
