@@ -1,7 +1,16 @@
 <script setup>
 import logo from './assets/logo.png'
 import ayam from './assets/ayam.png'
-
+onMounted(() => {
+  // Script akan otomatis di-load saat halaman dibuka
+  if (!document.getElementById('elfsight-script')) {
+    const script = document.createElement('script')
+    script.id = 'elfsight-script'
+    script.src = '"https://elfsightcdn.com/platform.js" async'
+    script.async = true
+    document.head.appendChild(script)
+  }
+})
 const testimoni = [
   {
     nama: 'Raden',
@@ -62,7 +71,27 @@ const testimoni = [
 
       </div>
     </section>
+<template>
+  <div class="tiktok-section">
+    <!-- Tempel div dari Elfsight di sini (ganti ID sesuai milikmu) -->
+    <div class="elfsight-app-7d8822d2-ff9c-4db9-90f0-d6dc130c996a" data-elfsight-app-lazy></div>
+  </div>
+</template>
 
+<script setup>
+import { onMounted } from 'vue'
+
+onMounted(() => {
+  // Script akan otomatis di-load saat halaman dibuka
+  if (!document.getElementById('elfsight-script')) {
+    const script = document.createElement('script')
+    script.id = 'elfsight-script'
+    script.src = 'https://static.elfsight.com/platform/platform.js'
+    script.async = true
+    document.head.appendChild(script)
+  }
+})
+</script>
     <!-- TENTANG KAMI -->
     <section id="tentang" class="about">
       <div class="container">
