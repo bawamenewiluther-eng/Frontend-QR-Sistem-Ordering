@@ -55,59 +55,63 @@
           </span>
         </div>
       </div>
+<!-- AREA PEMBAYARAN & UCAPAN TERIMA KASIH -->
+<div v-if="order.status === 'completed'" class="payment-section">
+  <!-- 1. JIKA SUDAH LUNAS -->
+  <div 
+    v-if="order.payment_status === 'paid' || order.is_paid === true || order.is_paid === 1" 
+    class="payment-card alert-success"
+  >
+    <div class="card-icon">🎉</div>
+    <h4>Pembayaran Lunas!</h4>
+    <p>Terima kasih sudah memesan dan menikmati santapan di <strong>Warung Mak Bos</strong>. Sampai jumpa di pesanan berikutnya!</p>
+  </div>
 
-      <!-- AREA PEMBAYARAN & UCAPAN TERIMA KASIH -->
-      <div v-if="order.status === 'completed'" class="payment-section">
-        <!-- JIKA SUDAH LUNAS / PAID -->
-        <div v-if="order.payment_status === 'paid' || order.is_paid" class="payment-card alert-success">
-          <div class="card-icon">🎉</div>
-          <h4>Pembayaran Lunas!</h4>
-          <p>Terima kasih sudah memesan dan menikmati santapan di <strong>Warung Mak Bos</strong>. Sampai jumpa di pesanan berikutnya!</p>
-        </div>
+  <!-- 2. JIKA BELUM LUNAS (Tampilkan Pilihan / Instruksi Pembayaran) -->
+  <template v-else>
+    <!-- Jika Belum Memilih Metode Pembayaran -->
+    <div v-if="!order.payment_method || order.payment_method === 'unpaid'">
+      <h3>Pilih Metode Pembayaran</h3>
+      <p class="payment-subtitle">Pilih metode pembayaran yang kamu inginkan:</p>
 
-        <!-- JIKA BELUM LUNAS / PROSES PEMBAYARAN -->
-        <template v-else>
-          <h3>Pilih Metode Pembayaran</h3>
-          <p class="payment-subtitle">Pilih metode pembayaran yang kamu inginkan:</p>
-
-          <!-- Pilihan Metode jika belum memilih -->
-          <div v-if="!order.payment_method || order.payment_method === 'unpaid'" class="payment-grid">
-            <button @click="choosePayment('cash')" class="btn-pay btn-cash">
-              <span class="pay-icon">💵</span>
-              <div class="pay-text">
-                <strong>Tunai / Cash</strong>
-                <small>Bayar di kasir</small>
-              </div>
-            </button>
-
-            <button @click="choosePayment('qris')" class="btn-pay btn-qris">
-              <span class="pay-icon">📱</span>
-              <div class="pay-text">
-                <strong>QRIS / E-Wallet</strong>
-                <small>GoPay, OVO, Dana, ShopeePay</small>
-              </div>
-            </button>
+      <div class="payment-grid">
+        <button @click="choosePayment('cash')" class="btn-pay btn-cash">
+          <span class="pay-icon">💵</span>
+          <div class="pay-text">
+            <strong>Tunai / Cash</strong>
+            <small>Bayar di kasir</small>
           </div>
+        </button>
 
-          <!-- Instruksi Pembayaran Tunai -->
-          <div v-else-if="order.payment_method === 'cash'" class="payment-card alert-cash">
-            <div class="card-icon">💵</div>
-            <h4>Pembayaran Tunai</h4>
-            <p>Silakan menuju kasir dan sebutkan <strong>Meja {{ order.table_number }}</strong> untuk menyelesaikan pembayaran.</p>
+        <button @click="choosePayment('qris')" class="btn-pay btn-qris">
+          <span class="pay-icon">📱</span>
+          <div class="pay-text">
+            <strong>QRIS / E-Wallet</strong>
+            <small>GoPay, OVO, Dana, ShopeePay</small>
           </div>
-
-          <!-- Instruksi Pembayaran QRIS -->
-          <div v-else-if="order.payment_method === 'qris'" class="payment-card alert-qris">
-            <div class="card-icon">📱</div>
-            <h4>Scan QRIS Warung</h4>
-            <p>Scan kode QR di bawah menggunakan aplikasi E-Wallet / Mobile Banking kamu:</p>
-            <div class="qris-box">
-              <img src="/images/qris-warung.jpeg" alt="QRIS Warung" class="qris-img" />
-            </div>
-            <p class="qris-note">Tunjukkan bukti transfer kepada staf saat makanan diantar.</p>
-          </div>
-        </template>
+        </button>
       </div>
+    </div>
+
+    <!-- Instruksi Jika Memilih Cash -->
+    <div v-else-if="order.payment_method === 'cash'" class="payment-card alert-cash">
+      <div class="card-icon">💵</div>
+      <h4>Pembayaran Tunai</h4>
+      <p>Silakan menuju kasir dan sebutkan <strong>Meja {{ order.table_number }}</strong> untuk menyelesaikan pembayaran.</p>
+    </div>
+
+    <!-- Instruksi Jika Memilih QRIS -->
+    <div v-else-if="order.payment_method === 'qris'" class="payment-card alert-qris">
+      <div class="card-icon">📱</div>
+      <h4>Scan QRIS Warung</h4>
+      <p>Scan kode QR di bawah menggunakan aplikasi E-Wallet / Mobile Banking kamu:</p>
+      <div class="qris-box">
+        <img src="/images/qris-warung.jpeg" alt="QRIS Warung" class="qris-img" />
+      </div>
+      <p class="qris-note">Tunjukkan bukti transfer kepada staf saat melakukan pembayaran.</p>
+    </div>
+  </template>
+           </div>
     </div>
   </div>
 </template>
