@@ -1,16 +1,19 @@
 <script setup>
+import { onMounted } from 'vue'
 import logo from './assets/logo.png'
 import ayam from './assets/ayam.png'
+
 onMounted(() => {
-  // Script akan otomatis di-load saat halaman dibuka
+  // Script Elfsight
   if (!document.getElementById('elfsight-script')) {
     const script = document.createElement('script')
     script.id = 'elfsight-script'
-    script.src = '"https://elfsightcdn.com/platform.js" async'
+    script.src = 'https://static.elfsight.com/platform/platform.js'
     script.async = true
     document.head.appendChild(script)
   }
 })
+
 const testimoni = [
   {
     nama: 'Raden',
@@ -71,27 +74,12 @@ const testimoni = [
 
       </div>
     </section>
-<template>
-  <div class="tiktok-section">
-    <!-- Tempel div dari Elfsight di sini (ganti ID sesuai milikmu) -->
-    <div class="elfsight-app-7d8822d2-ff9c-4db9-90f0-d6dc130c996a" data-elfsight-app-lazy></div>
-  </div>
-</template>
 
-<script setup>
-import { onMounted } from 'vue'
+    <!-- TIKTOK FEED (ELFSIGHT) -->
+    <section class="tiktok-section container">
+      <div class="elfsight-app-7d8822d2-ff9c-4db9-90f0-d6dc130c996a" data-elfsight-app-lazy></div>
+    </section>
 
-onMounted(() => {
-  // Script akan otomatis di-load saat halaman dibuka
-  if (!document.getElementById('elfsight-script')) {
-    const script = document.createElement('script')
-    script.id = 'elfsight-script'
-    script.src = 'https://static.elfsight.com/platform/platform.js'
-    script.async = true
-    document.head.appendChild(script)
-  }
-})
-</script>
     <!-- TENTANG KAMI -->
     <section id="tentang" class="about">
       <div class="container">
@@ -293,8 +281,6 @@ onMounted(() => {
       </div>
     </section>
 
-    
-
   </div>
 </template>
 
@@ -303,7 +289,7 @@ onMounted(() => {
 
 /* BRIGHT WARM LUXURY PALETTE */
 .luxury-wrapper {
-  background-color: #fdfbf7; /* Bright Warm Cream */
+  background-color: #fdfbf7;
   color: #2d241e;
   font-family: 'Plus Jakarta Sans', sans-serif;
   overflow-x: hidden;
@@ -450,6 +436,11 @@ h1, h2, h3, .receipt-title {
   width: 100%;
   max-height: 420px;
   object-fit: contain;
+}
+
+/* TIKTOK SECTION */
+.tiktok-section {
+  padding: 40px 0;
 }
 
 /* TENTANG KAMI */
@@ -764,48 +755,6 @@ h1, h2, h3, .receipt-title {
   box-shadow: 0 10px 25px rgba(0,0,0,0.05);
 }
 
-/* FOOTER */
-.footer {
-  background: #231912;
-  color: #f7f2e9;
-  padding: 30px 0;
-}
-
-.footer-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.footer p {
-  font-size: 14px;
-  color: #d6c5b3;
-  margin: 0;
-}
-
-.footer-socials {
-  display: flex;
-  gap: 15px;
-}
-
-.social-link {
-  color: #f7f2e9;
-  background: rgba(255, 255, 255, 0.1);
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-}
-
-.social-link:hover {
-  background: #d97706;
-  color: #ffffff;
-  transform: translateY(-3px);
-}
-
 /* RESPONSIVE */
 @media (max-width: 992px) {
   .hero-content, .about-wrap, .contact-grid {
@@ -827,12 +776,6 @@ h1, h2, h3, .receipt-title {
     bottom: 0;
     width: 100%;
     margin-top: 20px;
-  }
-
-  .footer-content {
-    flex-direction: column;
-    gap: 15px;
-    text-align: center;
   }
 }
 </style>
