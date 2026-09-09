@@ -108,11 +108,11 @@
       <div v-for="product in filteredProducts" :key="product.id" class="menu-card">
         <div class="image-wrapper">
           <!-- FIX: Menghapus gambar ganda -->
-          <img 
-            :src="product.image || '/images/gambardefault.png'" 
-            :alt="product.name" 
-            @error="(e) => e.target.src = '/images/gambardefault.png'"
-          />
+            <img 
+              :src="getImageUrl(product.image)" 
+              :alt="product.name" 
+              @error="(e) => e.target.src = '/images/gambardefault.png'"
+            />
           <span class="category-badge">
             {{ (product.category || '').toLowerCase() === 'minuman' ? '🥤 Minuman' : '🍛 Makanan' }}
           </span>
@@ -237,6 +237,23 @@ const route = useRoute()
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
 const API_URL = `${API_BASE_URL}/products`
 
+// Helper untuk mengonversi path relatif menjadi URL Backend penuh
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return '/images/gambardefault.png'
+
+  // Jika imagePath sudah berupa URL lengkap (misal: http:// atau https://)
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath
+  }
+
+  // Ambil URL dasar Backend (tanpa /api di ujungnya)
+  const backendBase = API_BASE_URL.replace(/\/api\/?$/, '')
+  const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`
+
+  // Menggabungkan URL backend dengan path gambar (tambahkan /storage jika menggunakan Laravel)
+  return `${backendBase}${cleanPath}` 
+}
+  
 // 1. PERBAIKAN: Ambil key MURNI dari URL query atau LocalStorage saja (TANPA DEFAULT FALLBACK)
 const getAdminKey = () => {
   return route.query.admin || localStorage.getItem('admin_secret') || ''
